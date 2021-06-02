@@ -1,0 +1,85 @@
+---
+title: "Modellierung eines Merkmals mit Gaußmixturen"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      webgl = TRUE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+require(DataVisualizations)
+require(AdaptGauss)
+require(FCPS)
+```
+
+## Data Mining eines Merkmals
+- Üblicherweise sammelt der Data Scientist viele Indizien für ein Merkman (hier "waiting")
+- Wenn mehrere Indizien in die selbe Richtung deuten kann eine Vermutung über die Verteilung gestellt werden
+- z.B. Geschwungener QQplot deutet auf Bimodalität hin, PDEplot zeigt 2 Moden, damit wird Histogramm vermutlich falsch liegen.
+
+```{r}
+i = 2 #ist variable waiting
+Merkmale = as.matrix(datasets::faithful)
+waiting = Merkmale[, i] 
+DataVisualizations::InspectVariable(waiting, i = i)
+```
+
+## Modelfit eines Gaussian Mixture Models (GMM) I
+- Bimodale Daten lassen sich mit einem GMM fitten
+- AdaptGauss::AdaptGauss lässt sich interaktiv steuern
+- Resultat ist ein GMM welches eindeutig durch Gewichte, Standardabweichungen und Mittelwerte der einzelenen Gauße definiert ist
+
+```{r}
+#gmm=AdaptGauss::AdaptGauss(waiting)
+#dput(gmm) #lese Daten für Konsoleneingabe aus
+#Kopiert Resultat aus Konsole als R tauglichen Code
+gmm = list(
+  Means = c(54.61, 80.09),
+  SDs = c(5.87,
+          5.86),
+  Weights = c(0.35, 0.65)
+)
+```
+
+## Modelfit eines Gaussian Mixture Models (GMM) II
+- AdaptGauss::PlotMixtures plottet das Model (rot) im Vergleich zu der geschätzten PDF
+    - Daumenregel: Ist die Differenz der beiden Kurven gering, so ist das Model gut
+    - Habt Ihr eine Idee anhand der bisherigen Vorlesung wie das Model zu prüfen ist?
+    
+```{r}
+AdaptGauss::PlotMixtures(
+  waiting,
+  gmm$Means,
+  gmm$SDs,
+  gmm$Weights,
+  xlim = range(waiting),
+  lwd = 2,
+  main = "GMM von waiting",
+  xlab = "waiting, Daten (schwarz), Model (rot)"
+)
+```  
+
+## Prüfung des Models
+- QQ plot zeigt eine Gerade => Das Model bildet die Daten gut ab
+- Verifikation über Statistik
+
+```{r}
+AdaptGauss::QQplotGMM(waiting, gmm$Means, gmm$SDs, gmm$Weights)
+
+#Statistische Test werden in dieser Vorlesung nicht behandelt
+#AdaptGauss::Chi2testMixtures(waiting,gmm$Means,gmm$SDs,gmm$Weights,PlotIt = T)
+#AdaptGauss::KStestMixtures(waiting,gmm$Means,gmm$SDs,gmm$Weights,PlotIt = T)
+```

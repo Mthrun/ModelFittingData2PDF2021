@@ -1,0 +1,75 @@
+---
+title: "Quantil/Quantil-Plot"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      webgl = TRUE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+require(DataVisualizations)
+```
+
+## QQ-Plot
+- Als Data Mining Werkzeug lassen sich QQ-Plots verwenden, wenn eine empirisch beobachtete Verteilung mit einer bekannten Verteilung verglichen wird.
+    - Beispiel: Mit einem Zufallsgenerator generierten Zahlen gespeichert im Vektor X1.
+- Üblicherweise wird die empirische Verteilung vor allem mit einer Normalverteilung verglichen.
+    - in R: qqnorm()
+
+```{r}
+#Erzeuge Daten aus Normalverteilung
+X1=rnorm(n = 10000,mean = 0,sd = 1)
+```
+
+## Beispiel
+- Bei den hier dargestellten QQ-Plots werden die Quantile des zu untersuchenden Merkmals auf der Y-Achse aufgetragen, die bekannte Verteilung auf der X-Achse. 
+- Damit ist an der Y Achse das Ablesen des Wertebereichs des Merkmals möglich.
+
+
+```{r}
+par(pty="s")#Plot ist Quadratisch
+qqnorm(X1)
+```
+
+## Interpretation
+- Bilden die so entstandenen Punkte annähernd eine Gerade, so kann davon ausgegangen werden, dass die beiden Verteilungen gleich sind.
+- Geraden lassen sich gut mit einer einfachen linearen Regression fitten (in rot).
+
+```{r}
+par(pty="s")
+quants = qqnorm(X1,pch=20,cex=0.5)
+#Simple Regression
+fit <- lm(quants$y ~ quants$x)
+#Zeichne Linie
+abline(fit, col = "red", lwd = 2)
+```
+
+## Variable ITS
+- Keine Gerade
+
+=> Entspricht nicht der theoretischen Verteilung
+
+=> Hier nicht Normalverteilt
+
+```{r}
+X1=DataVisualizations::ITS
+par(pty="s")
+quants = qqnorm(X1,pch=20,cex=0.5)
+#Simple Regression
+fit <- lm(quants$y ~ quants$x)
+#Zeichne Linie
+abline(fit, col = "red", lwd = 2)
+```

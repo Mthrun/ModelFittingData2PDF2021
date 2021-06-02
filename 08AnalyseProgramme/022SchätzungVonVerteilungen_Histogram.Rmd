@@ -1,0 +1,132 @@
+---
+title: "Schätzung von Verteilungen - Histogramme"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+```
+
+## Empirische Schätzung der PDF mit Histogram
+- Gegeben sei ein Merkmal ITS mit einer unbekannten Verteilung und die Anzahl der zusetzenden Intervalle NrOfBins
+
+1.) Setze einheitliche Schnittpunkte fest (-> rechte Intervallsgrenze b)
+
+2.) Teile die Variable mit cut() in Intervalle ein (-> linke Intervallsgrenze a)
+
+3.) Zähle mit table() die Anzahl an Datenpunkten je Intervall (a,b]
+
+```{r}
+#Echte Daten
+ITS = DataVisualizations::ITS
+NrOfBins = 10
+MinD = min(ITS)
+MaxD = max(ITS)
+MinD
+MaxD
+Breaks <- seq(MinD, MaxD, abs(MinD - MaxD) / NrOfBins)
+#cut divides the range of x into intervals
+#table counts at each combination the number
+countsPerInt = table(cut(ITS, Breaks))
+countsPerInt[1:5]
+```
+
+##  Plotte mit Histogram
+
+- Die Wahl geeigneter Intervallgrenzen ist dabei kritisch.
+    - Oben: nach eigenener Definition gezeichnet.
+    - Unten: hist() mit selbigem NrOfBins setzt die Intervallgrenzen anders.
+    
+=> Histogramme zeigen verschiedene Verteilungen.
+
+- Nota: Intervall wird überblicherweise "bin" genannt.
+
+```{r}
+nB <- length(Breaks)
+xlab = "ITS"
+ylab = "Frequency"
+#definiert den Bereicht des Plots vorab
+plot(
+  x = c(MinD, MaxD),
+  y = c(0, max(countsPerInt) * 1.2),
+  type = "n",
+  main = "Histogram",
+  xaxs = "i",
+  yaxs = "i",
+  axes = FALSE,
+  xlab = xlab,
+  ylab = ylab,
+  xlim = c(MinD, MaxD),
+  ylim = c(0, max(countsPerInt) * 1.2)
+)
+#Zeichnet jeden bin einzeln als gefuelltes rechteck in den Plot
+rect(
+  Breaks[-nB],
+  0,
+  Breaks[-1],
+  countsPerInt,
+  col = "blue",
+  border = "light blue",
+  xlab = "",
+  ylab = ylab,
+  xlim = c(MinD, MaxD),
+  ylim = c(0,
+           max(countsPerInt, na.rm = TRUE) * 1.2)
+)
+axis(1, col = "black", las = 1, xaxs = "i")
+axis(2, col = "black", las = 1, yaxs = "i")
+
+hist(ITS, breaks = NrOfBins)
+```
+
+##  PDF mit Histogram - Gleichverteilung
+-Die Wahl eines geeigneten Radius ist dabei kritisch. 
+  - Hier wird der Radius verkleinert indem die Anzahl an Bins vergrößert wird ohne den Radius genauer zu spezifizieren.
+  
+- Oben: kleine Anzahl an Bins, d.h. Großer Radius.
+- Unten: Große Anzahl an Bins, d.h. kleiner Radius.
+
+- Wir kennen die PDF einer Gleichverteilung 
+
+=> Wir wissen die richtige Einstellung von NrOfBins
+
+```{r}
+# Gleichverteilung
+gleichverteilt=runif(1000,min = 0,max = 1)
+NrOfBins=10
+hist(gleichverteilt, breaks = NrOfBins)
+NrOfBins=100
+hist(gleichverteilt, breaks = NrOfBins)
+```
+
+##  PDF mit Histogram - Merkmal X
+-Die Wahl eines geeigneten Radius ist dabei kritisch. 
+  - Hier wird der Radius verkleinert indem die Anzahl an Bins vergrößert wird ohne den Radius genauer zu spezifizieren.
+  
+- Oben: kleine Anzahl an Bins, d.h. Großer Radius.
+- Unten: Große Anzahl an Bins, d.h. kleiner Radius.
+
+- Wir wissen aber (noch) nicht wie das Merkmal ITS verteilt ist!
+
+=> Wir kennen die richtige Einstellung von NrOfBins nicht.
+```{r}
+# Ubekannte Variable
+NrOfBins=10
+hist(ITS, breaks = NrOfBins)
+NrOfBins=100
+hist(ITS, breaks = NrOfBins)
+```

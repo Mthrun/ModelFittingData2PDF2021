@@ -1,0 +1,56 @@
+---
+title: "Pareto Density Estimation (PDE)"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      webgl = TRUE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+require(DataVisualizations)
+```
+
+## Beispiel der Bestimmung PDE anhand eines Merkmales ITS
+- Gegeben sei ein Merkmal ITS mit einer unbekannten Verteilung
+- Bestimme den Pareto Radius rp aus den Daten
+- Nutze rp für eine Bestimmung der PDF
+
+```{r}
+#Gleichverteiltung
+ITS = DataVisualizations::ITS
+rp = DataVisualizations::ParetoRadius(ITS)
+pde = DataVisualizations::ParetoDensityEstimation(ITS, paretoRadius = rp)
+names(pde)
+```
+
+## Interpretation der PDE
+
+- Plotte dieses Resultat
+    - Empirisch geschätzte PDF zeigt 2 Hügel (Moden) an 
+    
+    => Indiz für Bimodale Verteilung
+    
+
+```{r}
+plot(
+  pde$kernels,
+  pde$paretoDensity,
+  xlab = "ITS",
+  ylab = "PDE",
+  main = "Empirisch geschätze PDF aus den Daten von ITS",
+  type = "l"
+)
+```

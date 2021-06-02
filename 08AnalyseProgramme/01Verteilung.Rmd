@@ -1,0 +1,82 @@
+---
+title: "Die Normalverteilung"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      webgl = TRUE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+```
+
+## Voraussetzung für Reproduktion von Beispielen
+- R Version > 4.0.0
+- pracma package aus CRAN
+- DataVisualizations package aus CRAN
+- AdaptGauss package aus CRAN
+- Wenn Funktionalität dieser Packages aufgerufen wird, so wird der scope operator "::" benutzt
+    - Hier: Damit weiß man welche Funktion zu welchem package gehört
+- Wenn "::" fehlt, bedeutet dies, dass die Funktionen mit der R installation geliefert werden.
+
+```{r}
+#Bitte einmalig auszufueren
+#install.packages("ggplot2",dependencies = TRUE)
+#install.packages("pracma",dependencies = TRUE)
+#install.packages("DataVisualizations",dependencies = TRUE)
+```
+
+## PDF einer Normalverteilung
+- Die Wahrscheinlichkeitsdichteverteilung bzw. probability density function (pdf) einer Normalverteilung lautet
+
+$$ N(x,M,SD)=\frac{1}{SD*\sqrt{2\pi}}e^{\frac{-(x-M)^2}{2*SD^2}}$$
+
+```{r}
+#Definiere X Werte
+x = seq(from = -3, to = 3, by = 0.1)
+#Definiere die Funktion für die Formel von N, norm()
+norm = function(x, M = 0, SD = 1) {
+  y = 1 / (SD * sqrt(2 * pi)) * exp(-((x - M) ^ 2 / (2 * SD ^ 2)))
+  return(y)
+}
+#Berechne y
+y=norm(x)
+#Trage x gegen y auf mit Achsenbeschriftungen
+plot(x,y,
+     main = "PDF of normal distribution with m = 0 and SD =1",
+     ylab = "PDF",
+     xlab = "x",type="l")
+
+```
+
+## CDF einer Normalverteilung
+- Das Integral über N(x,M,SD) nicht in geschlossener Form darstellbar
+
+- Daher wird häufig die Bezeichnung „erf“ oder „F“ (Fehlerfunktion) verwendet
+
+$$ p(x\in(-\infty])=\int_{-\infty}^{t} N(x,M,SD)dx=\frac{1}{2}*(1+erf(\frac{x-M}{SD\sqrt{2}}))=F(x,M,SD)$$
+
+```{r}
+#Definiere X Werte
+x = seq(from = -3, to = 3, by = 0.1)
+#Berechne y über erf definiert im Paket pracma
+y = (1 / 2) * (1 + pracma::erf(x / sqrt(2)))
+#Trage x gegen y auf
+plot(x,
+     y,
+     main = "CDF of normal distribution \n with m = 0 and SD =1",
+     ylab = "CDF",
+     xlab = "x",type="l")
+```

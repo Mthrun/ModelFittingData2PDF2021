@@ -1,0 +1,87 @@
+---
+title: "Anwendung von Bayes Theorem auf Gaußmixturen"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      webgl = TRUE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+require(DataVisualizations)
+require(AdaptGauss)
+require(FCPS)
+```
+
+## Waiting und Unser GMM
+
+```{r}
+Merkmale = as.matrix(datasets::faithful)
+waiting = Merkmale[, 2] 
+gmm = list(
+  Means = c(54.61, 80.09),
+  SDs = c(5.87,
+          5.86),
+  Weights = c(0.35, 0.65)
+)
+```
+
+## Bayes Theorem eines GMM
+1.) Bestimme die Posterioris des Models und zeichne diese
+
+2.) Bestimme die Bayes Entscheidungsgrenzen
+
+3.) Plotte Model mit Entscheidungsgrenzen und klassifiziere
+
+- Aufgetragen sind auf der y-Achse die Werte der Posterioirs und auf der x-Achse die Werte des Merkmals
+- Die Kurven sind die Wahrscheinlichkeiten Datenpunkte zu ziehen die dieser Mode (d.h. diesem Datenerzeugungsprozess) zugeordnet werden können
+
+```{r}
+Posteriori = AdaptGauss::Bayes4Mixtures(waiting, 
+                                        gmm$Means, gmm$SDs, gmm$Weights, PlotIt = T)
+#Sucht Posterori=0.5
+BD = AdaptGauss::BayesDecisionBoundaries(gmm$Means, gmm$SDs, gmm$Weights)
+BD
+```
+
+## Bayes Entscheidungsgrenzen
+- Posteriori=0.5 definieren wir eine Entscheidungsgrenze BD und zeichnen das Model
+- Bedeutet ab einem Wert von ca. 66 ist es Wahrscheinlicher in Mode 2 einen Datenpunkt zu ziehen wie in Mode 1
+- Auf der Magenta Linie ist es gleich wahrscheinlich Daten aus Mode 1 oder Mode 2 zu ziehen
+
+```{r}
+AdaptGauss::PlotMixtures(
+  waiting,
+  gmm$Means,
+  gmm$SDs,
+  gmm$Weights,
+  xlim = range(waiting),
+  lwd = 2,
+  main = "GMM von waiting \n mit Bayes Entscheidungsgrenze (magenta)",
+  xlab = "waiting, Daten (schwarz), Model (rot)"
+)
+abline(v = BD, col = "magenta", lwd = 2)
+```
+
+## Bayes Klassifizierung
+
+- Anhand BD lässt sich der Datensatz klassifizieren zu Cls
+    - Jeder Datenpunkt bekommt als ein label zugeordnet 
+    - Im Beispiel 1 oder 2, dies könnte z.B. gesund versus krank darstellen
+    
+```{r}
+Cls= AdaptGauss::ClassifyByDecisionBoundaries(waiting,DecisionBoundaries = BD)
+FCPS::ClusterCount(Cls)
+```

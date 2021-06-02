@@ -1,0 +1,90 @@
+---
+title: "Schätzung von Verteilungen - ECDF"
+author: "Michael C. Thrun"
+date: "01. Juni 2021"
+output: 
+  ioslides_presentation:
+    smaller: true
+---
+<style>
+  slides > slide {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  }
+</style>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message=FALSE,
+                      dpi=100,
+                      fig.align='left'
+                      )
+```
+
+## Empirische CDF (ECDF)
+- Empirical Cumulative Distribution Function (CDF)
+
+$$ecdf(x)=\frac{Anzahl Beobachtungen \leq x}{Anzahl Aller Beobachtungen} $$
+
+- ecdf liefert eine stückweise konstante Treppenfunktion
+
+- Zusammenhang mit Überlebensdaten spricht man bei der ecdf auch von Kaplan-Meier Analyse oder von „Sterbetafeln“.
+
+```{r,fig.keep='last'}
+#Definiere die Funktion für die obere ecdf Formel
+ecdf_own = function(x) {
+  x = sort(x) #sortiere werte
+  n = length(x)
+  vals = unique(x)#nehme nur eindeutige
+  #bestimmte stelle im vector
+  #an dem der erste eindeutige wert vorkommt
+  ind = match(x, vals)
+  #wieviel gibt es pro eindeutigem wert
+  Anzahl = tabulate(ind)
+  #kumulierte Summe
+  ecdfwert = cumsum(Anzahl) / n
+  return(cbind(vals, ecdfwert))
+}
+```
+
+## Darstellung der ECDF am Beispiel
+- Ziehe aus einem Zufallsgenerator einer Normalverteilung und wende ecdf_own() auf diesen Vektor an
+- x-Achse: Wertebereich von Merkmal X
+- y-Achse: Warscheinlichkeit p einen Werte x kleiner einer Schwelle t zu erhalten $$p(𝑥 ≤ t)$$  
+
+```{r,fig.keep='last'}
+#Generiere Zufallszahlen
+xpre=rnorm(1000, mean = 0, sd = 1)
+# Runde Werte auf 2 Nachkommastellen
+X = round(xpre, 2)
+#Schäte die ecdf ab
+xy = ecdf_own(X)
+plot(xy[, 1],
+     xy[, 2],
+     main = "ECDF of normal distribution with m = 0 and SD =1",
+     ylab = "Empirical CDF",
+     xlab = "X")
+```
+
+## Interpretation
+- Wähle einen Punkt W auf der x-Achse auf
+    - Hier Mittelwert
+- Wieviele Datenpunkte exisiteren bis zu diesem Wert?
+
+```{r}
+W = round(mean(X), 2)
+
+#Plotte
+plot(xy[, 1],
+     xy[, 2],
+     main = "ECDF of normal distribution with m = 0 and SD =1",
+     ylab = "Empirical CDF",
+     xlab = "X")
+
+#Wieviele Daten liegen bis zu diesem Wert W?
+abline(v = W, col = "red")
+select = which.min(abs(xy[, 1] - W))
+abline(h = xy[select, 2], col = "red")
+#50% in einer Normalverteilung
+xy[select, 2]
+```
